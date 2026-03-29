@@ -1,0 +1,33 @@
+export type MainStackParamList = {
+    Home: undefined;
+    Appointment: undefined;
+    ApointmentDetail: { id: string };
+    AppointmentArchive: undefined;
+    AppointmentCreate: undefined;
+    Inspection: undefined;
+    InspectionCreate: { id: string };
+    FollowUpAppointment: undefined;
+    FollowUpAppointmentCreate: { id: string };
+    Calendar: undefined;
+    Cards: undefined;
+    TextBook: undefined;
+    TextbookContent: undefined;
+    TextbookDetail: { id: string };
+    Profile: undefined;
+    BuySubscription: { phone: string };
+    SubscriptionEmail: { verifiedEmail?: string };
+    SubscriptionPurchase: undefined;
+    Nothifications: undefined;
+    Settings: undefined;
+    NotificationSettings: undefined;
+    EmailNotificationSettings: undefined;
+    NotificationTemplates: undefined;
+    ReminderIntervals: undefined;
+    ConfirmationCode: undefined;
+    Support: undefined;
+    FaqDetail: { questionId: string };
+    About: undefined;
+    AboutCompany: undefined;
+    AccountDeletion: undefined;
+    CalendarEvent: undefined;
+}

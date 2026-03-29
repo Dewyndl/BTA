@@ -1,0 +1,1 @@
+export * from './injection-zone-item-props.interface';

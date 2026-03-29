@@ -1,0 +1,493 @@
+{
+  "type": "suite_snapshot",
+  "suite_id": 1,
+  "suite_name": "Медицина: полный флоу врача",
+  "exported_at": "2026-03-17T19:04:13.178Z",
+  "cases": [
+    {
+      "case_id": 1,
+      "name": "Авторизация: шаг 1 — auth_hash",
+      "suite": 1,
+      "sort": 10,
+      "active": 1,
+      "chain_group": "auth",
+      "depends_on": 0,
+      "method": "POST",
+      "url": "/auth/",
+      "u_a_role": 0,
+      "params": "{\"login\":\"\",\"type\":\"e-mail\",\"password\":\"\"}",
+      "state_save": "{\"auth_hash\":\"auth_hash\"}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" },
+        { "type": "hasField", "field": "auth_hash", "value": "" }
+      ],
+      "snapshot_config": null,
+      "tags": "auth,chain"
+    },
+    {
+      "case_id": 2,
+      "name": "Авторизация: шаг 2 — token",
+      "suite": 1,
+      "sort": 20,
+      "active": 1,
+      "chain_group": "auth",
+      "depends_on": 1,
+      "method": "POST",
+      "url": "/token",
+      "u_a_role": 0,
+      "params": "{\"auth_hash\":\"\"}",
+      "state_save": "{\"token\":\"data.token\",\"u_hash\":\"data.u_hash\",\"u_id\":\"auth_user.u_id\"}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" },
+        { "type": "hasField", "field": "data.token", "value": "" }
+      ],
+      "snapshot_config": null,
+      "tags": "auth,chain"
+    },
+    {
+      "case_id": 3,
+      "name": "Конфигурация приложения",
+      "suite": 1,
+      "sort": 30,
+      "active": 1,
+      "chain_group": "config",
+      "depends_on": 2,
+      "method": "GET",
+      "url": "/data/",
+      "u_a_role": 0,
+      "params": "{}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" },
+        { "type": "hasField", "field": "data", "value": "" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain"
+    },
+    {
+      "case_id": 4,
+      "name": "Картотека: список пациентов",
+      "suite": 1,
+      "sort": 40,
+      "active": 1,
+      "chain_group": "patient",
+      "depends_on": 2,
+      "method": "POST",
+      "url": "/drive/archive",
+      "u_a_role": 2,
+      "params": "{\"type\":\"patient\",\"lo\":\"0\",\"lc\":\"10\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain"
+    },
+    {
+      "case_id": 5,
+      "name": "Создание пациента",
+      "suite": 1,
+      "sort": 50,
+      "active": 1,
+      "chain_group": "patient",
+      "depends_on": 2,
+      "method": "POST",
+      "url": "/register",
+      "u_a_role": 0,
+      "params": "{\"u_name\":\"Тестовый Пациент Авто\",\"u_phone\":\"+7000\",\"u_email\":\"auto_@test.ru\",\"u_role\":\"1\",\"st\":\"\",\"data\":\"{\\\"u_details\\\":{},\\\"password\\\":\\\"12345\\\"}\"}",
+      "state_save": "{\"co_id\":\"data.u_id\",\"co_token\":\"data.token\",\"co_hash\":\"data.u_hash\"}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": [
+        { "label": "Пациент", "method": "GET", "url": "/drive/archive", "params": { "patient_id": "" } }
+      ],
+      "tags": "chain"
+    },
+    {
+      "case_id": 6,
+      "name": "Поиск пациента по телефону",
+      "suite": 1,
+      "sort": 60,
+      "active": 1,
+      "chain_group": "patient",
+      "depends_on": 5,
+      "method": "POST",
+      "url": "/drive/archive",
+      "u_a_role": 2,
+      "params": "{\"type\":\"patient\",\"phone\":\"+70000000001\"}",
+      "state_save": "{ \"u_id\": \"data.u_id\" }",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain"
+    },
+    {
+      "case_id": 7,
+      "name": "Создание первичного приёма",
+      "suite": 1,
+      "sort": 70,
+      "active": 1,
+      "chain_group": "primary",
+      "depends_on": 5,
+      "method": "POST",
+      "url": "/drive",
+      "u_a_role": 4,
+      "params": "{\"data\":{\"b_start_address\":\"Тестовый адрес\",\"b_start_datetime\":\"now\",\"b_payment_way\":\"2\",\"b_options\":{},\"u_id\":\"\"}}",
+      "state_save": "{\"b_id\":\"data.b_id\"}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" },
+        { "type": "hasField", "field": "data.b_id", "value": "" }
+      ],
+      "snapshot_config": [
+        { "label": "Приём", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 8,
+      "name": "Детали приёма",
+      "suite": 1,
+      "sort": 80,
+      "active": 1,
+      "chain_group": "primary",
+      "depends_on": 7,
+      "method": "POST",
+      "url": "/drive/get/",
+      "u_a_role": 2,
+      "params": "{}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": [
+        { "label": "Приём", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 9,
+      "name": "Прикрепить пациента (set_performer)",
+      "suite": 1,
+      "sort": 90,
+      "active": 1,
+      "chain_group": "primary",
+      "depends_on": 7,
+      "method": "POST",
+      "url": "/drive/get/",
+      "u_a_role": 2,
+      "params": "{\"action\":\"set_performer\",\"performer\":\"1\",\"data\":\"{\\\"c_id\\\":\\\"100\\\",\\\"c_payment_way\\\":\\\"2\\\"}\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": [
+        { "label": "Приём", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 10,
+      "name": "Фото: presigned URL",
+      "suite": 1,
+      "sort": 100,
+      "active": 0,
+      "chain_group": "",
+      "depends_on": 9,
+      "method": "POST",
+      "url": "/storage/presign",
+      "u_a_role": 0,
+      "params": "{\"visit_id\":\"\",\"filename\":\"lob_static.jpg\",\"content_type\":\"image/jpeg\",\"zone\":\"лоб\",\"photo_type\":\"static\",\"purpose\":\"primary\"}",
+      "state_save": "{\"presigned_url\":\"data.presigned_url\",\"s3_key\":\"data.s3_key\"}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" },
+        { "type": "hasField", "field": "data.presigned_url", "value": "" },
+        { "type": "hasField", "field": "data.s3_key", "value": "" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 11,
+      "name": "Фото: привязать к приёму",
+      "suite": 1,
+      "sort": 110,
+      "active": 0,
+      "chain_group": "photos",
+      "depends_on": 10,
+      "method": "POST",
+      "url": "/drive/get/",
+      "u_a_role": 2,
+      "params": "{\"action\":\"edit\",\"photo_ids\":\"[\"\"]\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": [
+        { "label": "Приём с фото", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 12,
+      "name": "Завершение первичного приёма",
+      "suite": 1,
+      "sort": 120,
+      "active": 1,
+      "chain_group": "primary",
+      "depends_on": 9,
+      "method": "POST",
+      "url": "/drive/get/",
+      "u_a_role": 2,
+      "params": "{\"action\":\"complete\",\"data\":\"{\\\"zones_data\\\":[{\\\"zone\\\":\\\"лоб\\\",\\\"schema\\\":\\\"soft\\\",\\\"dose\\\":5}],\\\"schedule_followup\\\":true,\\\"followup_interval_days\\\":14,\\\"patient_notification\\\":{\\\"send\\\":false}}\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": [
+        { "label": "Завершённый приём", "method": "GET", "url": "/drive/get/" },
+        { "label": "Карточка пациента", "method": "GET", "url": "/drive/archive", "params": { "patient_id": "" } }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 13,
+      "name": "Запланированные осмотры",
+      "suite": 1,
+      "sort": 130,
+      "active": 1,
+      "chain_group": "followup",
+      "depends_on": 9,
+      "method": "POST",
+      "url": "/drive",
+      "u_a_role": 2,
+      "params": "{\"type\":\"followup\",\"status\":\"scheduled\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 14,
+      "name": "Создание осмотра (followup)",
+      "suite": 1,
+      "sort": 140,
+      "active": 1,
+      "chain_group": "followup",
+      "depends_on": 12,
+      "method": "POST",
+      "url": "/drive",
+      "u_a_role": 4,
+      "params": "{\"data\":{\"b_start_address\":\"Тестовый адрес\",\"b_start_datetime\":\"now\",\"b_payment_way\":\"2\",\"b_options\":{\"type\":\"followup\",\"parent_visit_id\":\"\"},\"u_id\":\"\"}}",
+      "state_save": "{\"b_id_followup\":\"data.b_id\"}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" },
+        { "type": "hasField", "field": "data.b_id", "value": "" }
+      ],
+      "snapshot_config": [
+        { "label": "Осмотр", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 15,
+      "name": "Данные предыдущего приёма для сравнения",
+      "suite": 1,
+      "sort": 150,
+      "active": 1,
+      "chain_group": "followup",
+      "depends_on": 14,
+      "method": "POST",
+      "url": "/drive/get/",
+      "u_a_role": 2,
+      "params": "{}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 16,
+      "name": "Завершение осмотра (complete_followup)",
+      "suite": 1,
+      "sort": 160,
+      "active": 1,
+      "chain_group": "followup",
+      "depends_on": 14,
+      "method": "POST",
+      "url": "/drive/get/",
+      "u_a_role": 2,
+      "params": "{\"action\":\"complete_followup\",\"data\":\"{\\\"results\\\":{\\\"лоб\\\":\\\"ok\\\",\\\"межбровье\\\":\\\"needs_correction\\\"},\\\"send_collage_to_patient\\\":false,\\\"schedule_repeat\\\":true,\\\"repeat_interval_months\\\":6}\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": [
+        { "label": "Завершённый осмотр", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 17,
+      "name": "Запланированные повторные приёмы",
+      "suite": 1,
+      "sort": 170,
+      "active": 1,
+      "chain_group": "repeat",
+      "depends_on": 16,
+      "method": "POST",
+      "url": "/drive",
+      "u_a_role": 2,
+      "params": "{\"type\":\"repeat\",\"status\":\"scheduled\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 18,
+      "name": "Создание повторного приёма",
+      "suite": 1,
+      "sort": 180,
+      "active": 1,
+      "chain_group": "repeat",
+      "depends_on": 16,
+      "method": "POST",
+      "url": "/drive",
+      "u_a_role": 4,
+      "params": "{\"data\":{\"b_start_address\":\"Тестовый адрес\",\"b_start_datetime\":\"now\",\"b_payment_way\":\"2\",\"b_options\":{\"type\":\"repeat\",\"parent_visit_id\":\"\"},\"u_id\":\"\"}}",
+      "state_save": "{\"b_id_repeat\":\"data.b_id\"}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" },
+        { "type": "hasField", "field": "data.b_id", "value": "" }
+      ],
+      "snapshot_config": [
+        { "label": "Повторный приём", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 19,
+      "name": "Список уведомлений",
+      "suite": 1,
+      "sort": 190,
+      "active": 0,
+      "chain_group": "notifications",
+      "depends_on": 2,
+      "method": "GET",
+      "url": "/drive",
+      "u_a_role": 2,
+      "params": "{\"type\":\"notifications\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": null,
+      "tags": "auth"
+    },
+    {
+      "case_id": 20,
+      "name": "Отправка напоминания пациенту",
+      "suite": 1,
+      "sort": 200,
+      "active": 1,
+      "chain_group": "notifications",
+      "depends_on": 14,
+      "method": "POST",
+      "url": "/contact/message/send",
+      "u_a_role": 0,
+      "params": "{\"data\":\"{\\\"batch\\\":[{\\\"patient_id\\\":\\\"\\\",\\\"template_type\\\":\\\"reminder_followup\\\"}]}\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": null,
+      "tags": "chain,auth"
+    },
+    {
+      "case_id": 21,
+      "name": "Негативный: неверный пароль",
+      "suite": 1,
+      "sort": 210,
+      "active": 1,
+      "chain_group": "",
+      "depends_on": 0,
+      "method": "POST",
+      "url": "/auth/",
+      "u_a_role": 0,
+      "params": "{\"login\":\"\",\"type\":\"e-mail\",\"password\":\"WRONG_PASSWORD_xyz999\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "404" }
+      ],
+      "snapshot_config": null,
+      "tags": "negative"
+    },
+    {
+      "case_id": 22,
+      "name": "Негативный: запрос без токена",
+      "suite": 1,
+      "sort": 220,
+      "active": 1,
+      "chain_group": "",
+      "depends_on": 0,
+      "method": "POST",
+      "url": "/drive",
+      "u_a_role": 0,
+      "params": "{\"token\":\"invalid_token\",\"u_hash\":\"invalid_hash\",\"u_a_role\":\"2\",\"data\":\"{\\\"patient_id\\\":\\\"1\\\",\\\"type\\\":\\\"primary\\\"}\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "404" }
+      ],
+      "snapshot_config": null,
+      "tags": "negative"
+    },
+    {
+      "case_id": 23,
+      "name": "Негативный: несуществующий приём",
+      "suite": 1,
+      "sort": 230,
+      "active": 1,
+      "chain_group": "",
+      "depends_on": 2,
+      "method": "POST",
+      "url": "/drive/get/99999999",
+      "u_a_role": 2,
+      "params": "{\"action\":\"set_cancel_state\",\"reason\":\"test negative\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "404" }
+      ],
+      "snapshot_config": null,
+      "tags": "negative"
+    },
+    {
+      "case_id": 24,
+      "name": "Cleanup: отмена тестового приёма",
+      "suite": 1,
+      "sort": 240,
+      "active": 1,
+      "chain_group": "cleanup",
+      "depends_on": 12,
+      "method": "POST",
+      "url": "/drive/get/",
+      "u_a_role": 2,
+      "params": "{\"action\":\"set_cancel_state\",\"reason\":\"autotest cleanup\",\"notify_patient\":\"false\"}",
+      "state_save": "{}",
+      "validations": [
+        { "type": "eq", "field": "code", "value": "200" }
+      ],
+      "snapshot_config": [
+        { "label": "Отменённый приём", "method": "GET", "url": "/drive/get/" }
+      ],
+      "tags": "chain,auth"
+    }
+  ]
+}

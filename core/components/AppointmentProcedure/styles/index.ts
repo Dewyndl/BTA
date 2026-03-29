@@ -1,0 +1,1 @@
+export * from './ppointment-procedure.style';

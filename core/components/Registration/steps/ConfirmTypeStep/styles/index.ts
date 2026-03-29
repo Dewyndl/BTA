@@ -1,0 +1,1 @@
+export * from './confirm-type-step.style';

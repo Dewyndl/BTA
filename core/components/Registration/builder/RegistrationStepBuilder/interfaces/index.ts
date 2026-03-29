@@ -1,0 +1,1 @@
+export * from './registration-step-builder-props.interface';

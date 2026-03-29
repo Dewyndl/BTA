@@ -1,0 +1,1 @@
+export * from './appointmetn-screen-props.interface';

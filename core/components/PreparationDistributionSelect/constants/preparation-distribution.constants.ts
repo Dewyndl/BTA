@@ -1,0 +1,9 @@
+export const TITLE_LINE_1 = 'Выберите вариант';
+export const TITLE_LINE_2 = 'распределения препарата';
+export const OPTION_SEPARATE = 'Отдельный шприц на каждую зону';
+export const OPTION_SINGLE = 'Один шприц с общей дозой';
+export const INPUT_PLACEHOLDER = 'Укажите название препарата';
+export const SKIP_TOGGLE_LABEL = 'Пропускать этот этап в дальнейшем';
+export const SUBMIT_BUTTON_LABEL = 'Продолжить';
+export const INFO_TEXT =
+  'Препарат стандартно восстановленный (50ед на 1,0мл NaCl2 или 100ед на 2,0мл NaCl2), используются инсулиновые шприцы U100, 1,0мл, оранжевые, 1 деление = 1 единица препарата.';

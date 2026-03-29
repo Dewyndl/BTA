@@ -1,0 +1,6 @@
+export enum FollowUpAppointmentCreateStepsEnum {
+  PROCEDURE_1 = 'PROCEDURE_1',
+  INJECTION_ZONES = 'INJECTION_ZONES',
+  PROCEDURE_2 = 'PROCEDURE_2',
+  HINT_MODAL = 'HINT_MODAL',
+}

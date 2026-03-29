@@ -1,0 +1,5 @@
+export enum FollowUpAppointmentStepsEnum {
+  APPOINTMENTS_LIST = 'APPOINTMENTS_LIST',
+  PROCEDURE = 'PROCEDURE',
+  INJECTION_ZONES = 'INJECTION_ZONES',
+}

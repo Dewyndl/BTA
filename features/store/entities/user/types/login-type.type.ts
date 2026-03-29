@@ -1,0 +1,1 @@
+export type LoginType = 'e-mail' | 'phone_code' | 'telegram_id,phone' | 'whatsapp';
