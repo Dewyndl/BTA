@@ -24,11 +24,17 @@ export const NotificationSettings = ({
   const [popupNotifications, setPopupNotifications] = useState(true);
 
   useEffect(() => {
-    AsyncStorage.multiGet(['notif_from', 'notif_to']).then(pairs => {
+    AsyncStorage.multiGet(['notif_from', 'notif_to', 'notif_silent_mode', 'notif_email_enabled', 'notif_popup_enabled']).then(pairs => {
       const from = pairs[0][1];
       const to = pairs[1][1];
+      const silent = pairs[2][1];
+      const email = pairs[3][1];
+      const popup = pairs[4][1];
       if (from) setNotifFrom(from);
       if (to) setNotifTo(to);
+      if (silent !== null) setSilentMode(silent === 'true');
+      if (email !== null) setEmailNotifications(email === 'true');
+      if (popup !== null) setPopupNotifications(popup === 'true');
     });
   }, []);
 
@@ -70,7 +76,7 @@ export const NotificationSettings = ({
             title="Тихий режим"
             description="Звуковые уведомления будут заменены на вибрацию"
             checked={silentMode}
-            onValueChange={setSilentMode}
+            onValueChange={(v) => { setSilentMode(v); AsyncStorage.setItem('notif_silent_mode', String(v)); }}
           />
         </View>
         <View style={notificationSettingsStyles.divider} />
@@ -79,7 +85,7 @@ export const NotificationSettings = ({
             title="Уведомления по Email"
             description="Выбрать какие уведомления будут приходить на ваш Email"
             checked={emailNotifications}
-            onValueChange={setEmailNotifications}
+            onValueChange={(v) => { setEmailNotifications(v); AsyncStorage.setItem('notif_email_enabled', String(v)); }}
           />
         </View>
         <View style={notificationSettingsStyles.divider} />
@@ -136,7 +142,7 @@ export const NotificationSettings = ({
           <SlideBtn
             title="Всплывающие уведомления"
             checked={popupNotifications}
-            onValueChange={setPopupNotifications}
+            onValueChange={(v) => { setPopupNotifications(v); AsyncStorage.setItem('notif_popup_enabled', String(v)); }}
           />
         </View>
       </View>

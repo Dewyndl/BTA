@@ -25,7 +25,7 @@ export const AppointmentsList = ({
   onItemPress,
 }: IAppointmentListProps) => {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-  const { data } = useListVisitsQuery({});
+  const { data } = useListVisitsQuery({}, { refetchOnMountOrArgChange: true });
   const { data: patients = [] } = useListPatientsQuery({});
 
   const patientNameMap: Record<string, string> = {};

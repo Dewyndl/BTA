@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SubscriptionPurchase } from '../../../components';
@@ -6,26 +6,56 @@ import type { ISubscriptionPlan, SubscriptionPurchaseStep } from '../../../compo
 import { MainWrapper } from '../../../wrappers';
 import type { MainStackParamList } from '../../../../app';
 import { SUBSCRIPTION_PLANS } from './constants';
+import { useGetSubscriptionQuery, useCreateSubscriptionMutation } from '../../../../features/store/entities/subscription';
+import { useSelector } from 'react-redux';
+import { selectUsers } from '../../../../features/store/entities/user';
 
-const MOCK_EXTENDED_UNTIL = '12.10.26';
+const formatEndDate = (timestamp: string): string => {
+  const ts = Number(timestamp);
+  if (!ts || ts < 100000) return '';
+  const date = new Date(ts * 1000);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = String(date.getFullYear()).slice(2);
+  return `${day}.${month}.${year}`;
+};
 
 export const SubscriptionPurchaseScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+  const { currentUser } = useSelector(selectUsers);
 
   const [step, setStep] = useState<SubscriptionPurchaseStep>('plan_selection');
   const [selectedPlan, setSelectedPlan] = useState<ISubscriptionPlan | null>(null);
+
+  const { data: subscriptions = [] } = useGetSubscriptionQuery();
+  const [createSubscription] = useCreateSubscriptionMutation();
+
+  const activeSubscription = useMemo(() => {
+    if (!currentUser) return null;
+    return subscriptions.find(
+      (s) => s.u_id === currentUser.u_id && s.paid && s.subs_status === '1',
+    ) ?? null;
+  }, [subscriptions, currentUser]);
+
+  const subscriptionEndDate = useMemo(() => {
+    if (!activeSubscription) return '';
+    return formatEndDate(activeSubscription.end_date);
+  }, [activeSubscription]);
 
   const handleSelectPlan = useCallback((plan: ISubscriptionPlan) => {
     setSelectedPlan(plan);
     setStep('payment_method');
   }, []);
 
-  const handlePay = useCallback(() => {
-    if (step === 'payment_error') return;
-    // Mock: 70% success, 30% error
-    const success = Math.random() > 0.3;
-    setStep(success ? 'payment_success' : 'payment_error');
-  }, [step]);
+  const handlePay = useCallback(async () => {
+    if (step === 'payment_error' || !selectedPlan) return;
+    try {
+      await createSubscription({ tariff: selectedPlan.tariffId }).unwrap();
+      setStep('payment_success');
+    } catch {
+      setStep('payment_error');
+    }
+  }, [step, selectedPlan, createSubscription]);
 
   const handleOkSuccess = useCallback(() => {
     navigation.navigate('Profile');
@@ -52,7 +82,7 @@ export const SubscriptionPurchaseScreen = () => {
         plans={SUBSCRIPTION_PLANS}
         step={step}
         selectedPlan={selectedPlan}
-        subscriptionExtendedUntil={MOCK_EXTENDED_UNTIL}
+        subscriptionExtendedUntil={subscriptionEndDate}
         onSelectPlan={handleSelectPlan}
         onPay={handlePay}
         onOkSuccess={handleOkSuccess}

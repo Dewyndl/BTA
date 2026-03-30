@@ -2,8 +2,9 @@ import type { ImageSourcePropType } from 'react-native';
 
 export interface ISubscriptionPlan {
   id: string;
+  tariffId: string;
   price: number;
   months: number;
-  badge?: string; // e.g. "Экономия 200 руб. за месяц"
+  badge?: string;
   icon: ImageSourcePropType;
 }

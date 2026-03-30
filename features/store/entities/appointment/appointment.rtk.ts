@@ -1,5 +1,4 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { NativeModules } from "react-native";
 import { BASE_URL } from "../../../../common/config";
 import { baseQueryWithErrorLogging, transformFormData } from "../../../../common";
 import {
@@ -27,33 +26,30 @@ export const appointmentRtk = createApi({
   endpoints: (builder) => ({
     listPatients: builder.query<IPatientApi[], { lo?: string; lc?: string }>({
       query: ({ lo = "0", lc = "20" }) => ({
-        url: "/drive/archive",
+        url: "/user",
         method: "POST",
-        body: transformFormData({ type: "patient", lo, lc, u_a_role: "2" }),
+        body: transformFormData({ u_role: "1", lo, lc, u_a_role: "2" }),
       }),
       transformResponse: (raw: IPatientListResponse) => {
-        if (!raw || Array.isArray(raw) || !raw.data?.booking) return [];
-        return bookingToArray(raw.data.booking as Record<string, IPatientApi>);
+        if (!raw || Array.isArray(raw) || !raw.data?.user) return [];
+        return Object.values(raw.data.user);
       },
       providesTags: ["Patient"],
     }),
     searchPatients: builder.mutation<IPatientApi[], { phone: string }>({
       query: ({ phone }) => ({
-        url: "/drive/archive",
+        url: "/user",
         method: "POST",
-        body: transformFormData({ type: "patient", phone, u_a_role: "2" }),
+        body: transformFormData({ u_phone: phone, u_a_role: "2" }),
       }),
       transformResponse: (raw: IPatientListResponse) => {
-        if (!raw || Array.isArray(raw) || !raw.data?.booking) return [];
-        return bookingToArray(raw.data.booking as Record<string, IPatientApi>);
+        if (!raw || Array.isArray(raw) || !raw.data?.user) return [];
+        return Object.values(raw.data.user);
       },
     }),
     createPatient: builder.mutation<ICreatePatientResponse, ICreatePatientPayload>({
       queryFn: async (payload) => {
         try {
-          await new Promise<void>((resolve) => {
-            NativeModules.Networking?.clearCookies(resolve) ?? resolve();
-          });
           const body = transformFormData({ ...payload });
           const response = await fetch(`${BASE_URL}register`, {
             method: "POST",
@@ -91,7 +87,7 @@ export const appointmentRtk = createApi({
         method: "POST",
         body: transformFormData({ data: JSON.stringify(visitData), u_a_role: "4" }),
       }),
-      invalidatesTags: ["Visit"],
+      invalidatesTags: ["Visit", "Patient"],
     }),
     getVisit: builder.query<IVisit | null, string>({
       query: (b_id) => ({

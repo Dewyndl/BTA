@@ -26,11 +26,7 @@ export const AppointmentCreateStepBuilder = ({
 
   useEffect(() => {
     getAllBody(allBody);
-  }, [allBody]);
-
-  useEffect(() => {
-    setAllBody(body);
-  }, [body]);
+  }, [allBody, getAllBody]);
 
   const props = {
     getBody: (partialBody: BodyType) => setAllBody((prev) => ({ ...prev, ...partialBody })),

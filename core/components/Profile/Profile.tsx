@@ -212,13 +212,17 @@ export const Profile = ({ onBuySubscription }: ProfileProps) => {
 
   const handleSave = async (values: Partial<IProfile>) => {
     if (!currentUser) return;
+    const updatedName = values.firstName ?? currentUser.u_name;
+    const updatedFamily = values.lastName ?? currentUser.u_family ?? '';
+    const updatedMiddle = values.middleName ?? currentUser.u_middle ?? '';
+    const updatedEmail = values.email ?? currentUser.u_email ?? '';
     const result = await editUser({
       data: {
         u_id: currentUser.u_id,
-        u_name: values.firstName ?? currentUser.u_name,
-        u_family: values.lastName ?? currentUser.u_family ?? '',
-        u_middle: values.middleName ?? currentUser.u_middle ?? '',
-        u_email: values.email ?? currentUser.u_email ?? '',
+        u_name: updatedName,
+        u_family: updatedFamily,
+        u_middle: updatedMiddle,
+        u_email: updatedEmail,
         u_phone: currentUser.u_phone ?? '',
         u_role: currentUser.u_role as '1' | '2' | '3' | '4',
       },
@@ -227,10 +231,10 @@ export const Profile = ({ onBuySubscription }: ProfileProps) => {
     if ('data' in result && result.data) {
       dispatch(fillUser({
         ...currentUser,
-        u_name: result.data.u_name,
-        u_family: result.data.u_family,
-        u_middle: result.data.u_middle,
-        u_email: result.data.u_email,
+        u_name: updatedName,
+        u_family: updatedFamily,
+        u_middle: updatedMiddle,
+        u_email: updatedEmail,
       }));
     }
     setIsEditMode(false);

@@ -30,7 +30,7 @@ export const selectStyles = StyleSheet.create({
     flex: 1,
   },
   placeholderText: {
-    color: palette.borderMedium,
+    color: palette.placeholder,
   },
   chevron: {
     marginLeft: 8,

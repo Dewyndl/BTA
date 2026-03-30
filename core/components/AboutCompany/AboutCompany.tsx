@@ -5,11 +5,15 @@ import { CustomText } from '../../uikit';
 import { ABOUT_COMPANY_BODY } from './constants';
 import { aboutCompanyStyles as styles } from './styles';
 
-export const AboutCompany = () => {
+type AboutCompanyProps = {
+  body?: string;
+};
+
+export const AboutCompany = ({ body = ABOUT_COMPANY_BODY }: AboutCompanyProps) => {
   return (
     <View style={styles.scrollContent}>
       <CustomText
-        value={ABOUT_COMPANY_BODY}
+        value={body}
         variant="medium"
         fontSize={14}
         color={palette.textSecondary}

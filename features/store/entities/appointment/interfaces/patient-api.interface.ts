@@ -13,7 +13,7 @@ export interface IPatientApi {
 export interface IPatientListResponse {
   code: string;
   status: string;
-  data: { booking: Record<string, IPatientApi> | IPatientApi[] };
+  data: { user: Record<string, IPatientApi> };
 }
 
 export interface ICreatePatientPayload {
