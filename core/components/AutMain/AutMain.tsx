@@ -4,14 +4,12 @@ import { Button } from "../../uikit"
 import { aquaGradient, blackGradient, flexbox } from "../../design"
 import { authMainStyles } from "./styles"
 import { IAuthMainProps } from "./interfaces"
-import { useGetAppConfigQuery } from "../../../features"
 
 export const AutMain = ({
   pressLogin,
   pressRegister,
   pressHelp,
 }: IAuthMainProps) => {
-    useGetAppConfigQuery();
     return (
         <View style={authMainStyles.container}>
             <View style={[authMainStyles.imageContainer, flexbox.alignCenter]}>

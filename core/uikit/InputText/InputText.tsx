@@ -4,7 +4,7 @@ import { IInputTextProps } from './interfaces';
 import { inputTextStyles } from './styles';
 import { InputTextTypesEnum } from './enums';
 import MaskInput from 'react-native-mask-input';
-import { flexbox } from '../../design';
+import { flexbox, palette } from '../../design';
 
 export const InputText = ({
   value,
@@ -35,6 +35,7 @@ export const InputText = ({
           onChangeText={(text) => change(text, inputName)}
           keyboardType="numeric"
           placeholder={placeholder}
+          placeholderTextColor={palette.placeholder}
           onBlur={blur}
           style={[inputTextStyles.text, centerText && inputTextStyles.centerText]}
         />
@@ -44,6 +45,7 @@ export const InputText = ({
           value={value ? value : ''}
           onChangeText={(text) => change(text, inputName)}
           placeholder={placeholder}
+          placeholderTextColor={palette.placeholder}
           onBlur={blur}
           multiline={isTextarea}
           numberOfLines={isTextarea ? 4 : 1}

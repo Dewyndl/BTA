@@ -40,7 +40,7 @@ export const Select = ({
             value={displayValue || placeholder}
             variant="medium"
             fontSize={14}
-            color={displayValue ? palette.textPrimary : palette.borderMedium}
+            color={displayValue ? palette.textPrimary : palette.placeholder}
           />
           <View style={selectStyles.chevron}>
             <ChevronDownIcon />

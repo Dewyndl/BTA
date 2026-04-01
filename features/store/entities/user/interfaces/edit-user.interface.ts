@@ -17,11 +17,6 @@ export interface IEditUser {
 }
 
 export interface IEditUserResponse {
-    u_id: string
-    u_name: string
-    u_middle: string
-    u_family: string
-    u_email: string
-    u_phone: string
-    u_role: UserRoleType
+    affected_fields: string[]
+    forbidden_fields: string[]
 }

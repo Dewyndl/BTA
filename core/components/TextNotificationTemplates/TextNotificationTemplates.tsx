@@ -1,4 +1,5 @@
-import React, { useCallback, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -51,6 +52,16 @@ export const TextNotificationTemplates = () => {
   const [formText, setFormText] = useState('');
   const [formError, setFormError] = useState('');
 
+  useEffect(() => {
+    AsyncStorage.getItem('notif_templates').then(stored => {
+      if (stored) {
+        const parsed: ITemplateItem[] = JSON.parse(stored);
+        setTemplates(parsed.filter(t => t.isDefault));
+        setCustomTemplates(parsed.filter(t => !t.isDefault));
+      }
+    });
+  }, []);
+
   const allTemplates = [...templates, ...customTemplates];
 
   const handleEditTemplate = useCallback((item: ITemplateItem) => {
@@ -93,34 +104,29 @@ export const TextNotificationTemplates = () => {
     if (viewMode === 'new') {
       const title =
         formTitle.trim() || `Мой шаблон номер ${customTemplates.length + 1}`;
-      setCustomTemplates((prev) => [
-        ...prev,
-        {
-          id: `custom-${Date.now()}`,
-          title,
-          text: formText,
-          isDefault: false,
-        },
-      ]);
+      const newItem: ITemplateItem = { id: `custom-${Date.now()}`, title, text: formText, isDefault: false };
+      const updatedCustom = [...customTemplates, newItem];
+      setCustomTemplates(updatedCustom);
+      AsyncStorage.setItem('notif_templates', JSON.stringify([...templates, ...updatedCustom]));
     } else if (editingId) {
       const isDefault = templates.some((t) => t.id === editingId);
       if (isDefault) {
-        setTemplates((prev) =>
-          prev.map((t) =>
-            t.id === editingId ? { ...t, text: formText } : t
-          )
+        const updatedTemplates = templates.map((t) =>
+          t.id === editingId ? { ...t, text: formText } : t
         );
+        setTemplates(updatedTemplates);
+        AsyncStorage.setItem('notif_templates', JSON.stringify([...updatedTemplates, ...customTemplates]));
       } else {
-        setCustomTemplates((prev) =>
-          prev.map((t) =>
-            t.id === editingId ? { ...t, title: formTitle.trim() || t.title, text: formText } : t
-          )
+        const updatedCustom = customTemplates.map((t) =>
+          t.id === editingId ? { ...t, title: formTitle.trim() || t.title, text: formText } : t
         );
+        setCustomTemplates(updatedCustom);
+        AsyncStorage.setItem('notif_templates', JSON.stringify([...templates, ...updatedCustom]));
       }
     }
     setViewMode('list');
     setEditingId(null);
-  }, [viewMode, editingId, formTitle, formText, templates]);
+  }, [viewMode, editingId, formTitle, formText, templates, customTemplates]);
 
   const isSaveDisabled = formError.length > 0 || !validateText(formText);
   const isEditMode = viewMode === 'edit';

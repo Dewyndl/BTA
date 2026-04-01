@@ -27,7 +27,7 @@ export type MainStackParamList = {
     Support: undefined;
     FaqDetail: { questionId: string };
     About: undefined;
-    AboutCompany: undefined;
+    AboutCompany: { title?: string; body?: string } | undefined;
     AccountDeletion: undefined;
     CalendarEvent: undefined;
 }

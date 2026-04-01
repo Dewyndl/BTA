@@ -15,10 +15,19 @@ import { appointmentCalendarPageStyles } from './styles/appointment-calendar.sty
 
 
 
+const todayString = () => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+
 export const AppointmentCalendar = () => {
   const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const [isVisibleActions, setIsVisibleActions] = useState(false);
   const [isSearch, setIsSearch] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(todayString());
   const { data: visitsData } = useListVisitsQuery({});
   const { data: patients = [] } = useListPatientsQuery({});
 
@@ -26,7 +35,11 @@ export const AppointmentCalendar = () => {
   patients.forEach((p) => { patientNameMap[p.u_id] = p.u_name; });
 
   const todayVisits = (visitsData ?? [])
-    .filter((v) => v.b_completed === null && v.b_cancel_reason === null)
+    .filter((v) => {
+      if (v.b_completed !== null || v.b_cancel_reason !== null) return false;
+      const visitDate = v.b_start_datetime.slice(0, 10);
+      return visitDate === selectedDate;
+    })
     .map((visit) => {
       const options = visit.b_options;
       const type = options?.type === 'followup' ? AppointmentTypesEnum.CHECKUP
@@ -70,10 +83,10 @@ export const AppointmentCalendar = () => {
       {
         isSearch ? (<Search setModalState={setIsSearch} />) : (
           <View>
-            <CustomCalendar setModalState={setIsSearch} setIsVisible={setIsVisibleActions} />
+            <CustomCalendar setModalState={setIsSearch} setIsVisible={setIsVisibleActions} selectedDate={selectedDate} onDayPress={setSelectedDate} />
             <View style={appointmentCalendarPageStyles.bottomContainer}>
               <CustomText
-                value={`Сегодня ${new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}:`}
+                value={selectedDate === todayString() ? `Сегодня ${new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}:` : `${new Date(selectedDate + 'T00:00:00').toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}:`}
                 textStyles={{
                   fontStyle: FontStyleEnum.NORMAL,
                   fontWeight: FontWeightEnum.MEDIUM,

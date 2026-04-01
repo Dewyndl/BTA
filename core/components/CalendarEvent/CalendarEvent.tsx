@@ -1,5 +1,5 @@
 import React from "react"
-import { View } from "react-native"
+import { Alert, View } from "react-native"
 import { aquaGradient, blackGradient, flexbox } from "../../design"
 import { Button, CustomText, FontsFamilyEnum, FontStyleEnum, FontWeightEnum } from "../../uikit"
 import { useNavigation } from "@react-navigation/native"
@@ -39,7 +39,7 @@ export const CalendarEvent = () => {
                 <Button
                     label={"Новое мероприятие"}
                     onPress={() => {
-                        navigation.navigate("CalendarEvent")
+                        Alert.alert("В разработке")
                     }}
                     gradient={blackGradient}
                     textColor="#FFF"

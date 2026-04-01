@@ -13,17 +13,26 @@ const todayString = () => {
 
 export const CustomCalendar = ({
     setModalState,
-    setIsVisible
+    setIsVisible,
+    onDayPress,
+    selectedDate,
 }: ICustomCalendarProps) => {
+    const today = todayString();
+    const markedDates: Record<string, { selected?: boolean; selectedColor?: string; marked?: boolean; dotColor?: string }> = {};
+    if (selectedDate && selectedDate !== today) {
+        markedDates[today] = { marked: true, dotColor: "#0E7C7B" };
+        markedDates[selectedDate] = { selected: true, selectedColor: "#0E7C7B" };
+    } else {
+        markedDates[today] = { selected: true, selectedColor: "#0E7C7B" };
+    }
     return (
         <View>
             <Calendar
                 renderHeader={(date, info) => date && <CalendarHeader {...{date, info, setModalState, setIsVisible}} />}
                 current={todayString()}
                 firstDay={1}
-                markedDates={{
-                    [todayString()]: { selected: true, selectedColor: "#0E7C7B" },
-                }}
+                markedDates={markedDates}
+                onDayPress={(day) => onDayPress?.(day.dateString)}
                 hideArrows
                 
                 theme={{
