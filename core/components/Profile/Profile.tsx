@@ -121,8 +121,35 @@ const ProfileView = ({ profile, onEdit, onBuySubscription }: ProfileViewProps) =
   </View>
 );
 
+const NAME_REGEX = /^[а-яёА-ЯЁa-zA-Z\s]*$/;
+const MAX_NAME_LENGTH = 50;
+
+const nameRules = (label: string) => [
+  { type: 'required' as const, message: 'Обязательное поле' },
+  {
+    type: 'custom' as const,
+    validate: (value: unknown): string | null => {
+      const str = value != null ? String(value) : '';
+      const invalidChars = !NAME_REGEX.test(str);
+      const tooLong = str.length > MAX_NAME_LENGTH;
+      if (invalidChars && tooLong) {
+        return `Поле ${label} не может содержать символы / превышать 50 символов`;
+      }
+      if (invalidChars) {
+        return `Поле ${label} не может содержать символы`;
+      }
+      if (tooLong) {
+        return `Поле ${label} не может превышать 50 символов`;
+      }
+      return null;
+    },
+  },
+];
+
 const EDIT_SCHEMA: ValidationSchema = {
-  ...createRequiredSchema(['firstName', 'lastName', 'middleName', 'email']),
+  firstName: nameRules('Имя'),
+  lastName: nameRules('Фамилия'),
+  middleName: nameRules('Отчество'),
   email: [{ type: 'required', message: 'Обязательное поле' }, { type: 'email' }],
 };
 
@@ -203,8 +230,8 @@ export const Profile = ({ onBuySubscription }: ProfileProps) => {
     phone: currentUser?.u_phone ?? '',
     subscriptionEndDate: '-',
     trialDaysLeft: 0,
-    clinicName: currentUser?.u_city ?? '-',
-    clinicAddress: '',
+    clinicName: currentUser?.u_lang_skills ?? '-',
+    clinicAddress: currentUser?.u_description ?? '',
   };
 
   const handleEdit = () => setIsEditMode(true);
@@ -216,6 +243,8 @@ export const Profile = ({ onBuySubscription }: ProfileProps) => {
     const updatedFamily = values.lastName ?? currentUser.u_family ?? '';
     const updatedMiddle = values.middleName ?? currentUser.u_middle ?? '';
     const updatedEmail = values.email ?? currentUser.u_email ?? '';
+    const updatedDescription = values.clinicAddress ?? currentUser.u_description ?? '';
+    const updatedLangSkills = values.clinicName ?? currentUser.u_lang_skills ?? '';
     const result = await editUser({
       data: {
         u_id: currentUser.u_id,
@@ -225,6 +254,8 @@ export const Profile = ({ onBuySubscription }: ProfileProps) => {
         u_email: updatedEmail,
         u_phone: currentUser.u_phone ?? '',
         u_role: currentUser.u_role as '1' | '2' | '3' | '4',
+        u_description: updatedDescription,
+        u_lang_skills: updatedLangSkills,
       },
       auth: {} as never,
     });
@@ -235,6 +266,8 @@ export const Profile = ({ onBuySubscription }: ProfileProps) => {
         u_family: updatedFamily,
         u_middle: updatedMiddle,
         u_email: updatedEmail,
+        u_description: updatedDescription,
+        u_lang_skills: updatedLangSkills,
       }));
     }
     setIsEditMode(false);

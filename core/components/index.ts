@@ -43,3 +43,4 @@ export * from './SingleSyringe';
 export * from './MultipleSyringes';
 export * from './AppointmentCompletion';
 export * from './CalendarEvent';
+export * from './ExitConfirmModal/ExitConfirmModal';

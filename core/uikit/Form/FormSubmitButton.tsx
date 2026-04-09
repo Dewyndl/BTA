@@ -5,8 +5,9 @@ import type { IButtonProps } from '../Button/interfaces';
 
 type FormSubmitButtonProps = Omit<IButtonProps, 'onPress'>;
 
-export const FormSubmitButton = (props: FormSubmitButtonProps) => {
-  const { handleSubmit } = useFormContext();
+export const FormSubmitButton = ({ isDisabled, ...props }: FormSubmitButtonProps) => {
+  const { handleSubmit, errors } = useFormContext();
+  const hasErrors = Object.keys(errors).length > 0;
 
-  return <Button {...props} onPress={handleSubmit} />;
+  return <Button {...props} isDisabled={isDisabled ?? hasErrors} onPress={handleSubmit} />;
 };

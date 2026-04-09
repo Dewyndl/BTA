@@ -14,6 +14,8 @@ export interface IEditUser {
     u_email: string
     u_phone: string
     u_role: UserRoleType
+    u_description?: string
+    u_lang_skills?: string
 }
 
 export interface IEditUserResponse {

@@ -1,10 +1,12 @@
-import React from 'react';
-import { Alert } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { Alert, BackHandler } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { ScreenProps } from '../types';
 import { MainWrapper } from '../../../wrappers';
 import { AppointmentCreate } from '../../../components';
-import { useCreatePatientMutation, useCreateVisitMutation, useGetPresignedUrlMutation, useVisitActionMutation } from '../../../../features';
+import { ExitConfirmModal } from '../../../components/ExitConfirmModal/ExitConfirmModal';
+import { useCreatePatientMutation, useCreateVisitMutation, useGetPresignedUrlMutation, useVisitActionMutation, useSearchPatientsMutation } from '../../../../features';
 import type { BodyType } from '../../../../common';
 import { uploadPhotoToS3 } from '../../../../common';
 import { selectUsers } from '../../../../features/store/entities/user/user.slice';
@@ -12,11 +14,24 @@ import { selectUsers } from '../../../../features/store/entities/user/user.slice
 export const AppointmentCreateScreen = ({
   navigation,
 }: ScreenProps<'AppointmentCreate'>) => {
+  const [isExitModalVisible, setIsExitModalVisible] = useState(false);
   const { currentUser } = useSelector(selectUsers);
   const [createPatient] = useCreatePatientMutation();
   const [createVisit] = useCreateVisitMutation();
   const [getPresignedUrl] = useGetPresignedUrlMutation();
   const [visitAction] = useVisitActionMutation();
+  const [searchPatients] = useSearchPatientsMutation();
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        setIsExitModalVisible(true);
+        return true;
+      };
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
 
   const handleComplete = async (finalBody: BodyType) => {
     const firstName = String(finalBody.firstName ?? '');
@@ -36,13 +51,26 @@ export const AppointmentCreateScreen = ({
       data: JSON.stringify({ u_details: {}, password: generatePassword() }),
     });
 
-    if (!('data' in patientResult) || !patientResult.data?.data?.u_id) {
-      const msg = ('error' in patientResult && (patientResult.error as { data?: { message?: string } })?.data?.message) || 'Не удалось создать пациента';
-      Alert.alert('Ошибка', msg);
-      return;
+    let u_id: string;
+
+    if ('data' in patientResult && patientResult.data?.code === '200' && patientResult.data?.data?.u_id) {
+      u_id = patientResult.data.data.u_id;
+    } else {
+      const rawMsg: string = ('data' in patientResult ? (patientResult.data as unknown as { message?: string })?.message : undefined) ?? '';
+      if (rawMsg.includes('double phone') || rawMsg.includes('busy user')) {
+        const searchResult = await searchPatients({ phone });
+        if ('data' in searchResult && searchResult.data && searchResult.data.length > 0) {
+          u_id = searchResult.data[0].u_id;
+        } else {
+          Alert.alert('Ошибка', 'Пациент с таким номером уже существует, но не найден в системе');
+          return;
+        }
+      } else {
+        Alert.alert('Ошибка', rawMsg || 'Не удалось создать пациента');
+        return;
+      }
     }
 
-    const u_id = patientResult.data.data.u_id;
     const now = new Date();
     const pad = (n: number) => String(n).padStart(2, '0');
     const tz = -now.getTimezoneOffset();
@@ -50,16 +78,26 @@ export const AppointmentCreateScreen = ({
     const tzH = pad(Math.floor(Math.abs(tz) / 60));
     const tzM = pad(Math.abs(tz) % 60);
     const formatted = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}${tzSign}${tzH}:${tzM}`;
+
     const visitResult = await createVisit({
       u_id,
-      b_start_address: currentUser?.u_city ?? '',
+      b_start_address: currentUser?.u_city || 'Не указан',
       b_start_datetime: formatted,
       b_payment_way: '1',
       b_options: {},
     });
 
-    if ('data' in visitResult && visitResult.data?.data?.b_id && finalBody.photoUri) {
-      const b_id = visitResult.data.data.b_id;
+    if (!('data' in visitResult) || visitResult.data?.code !== '200' || !visitResult.data?.data?.b_id) {
+      const visitMsg = ('error' in visitResult ? (visitResult.error as { data?: { message?: string } })?.data?.message : undefined)
+        ?? (visitResult as { data?: { message?: string } }).data?.message
+        ?? 'Не удалось создать запись';
+      Alert.alert('Ошибка', visitMsg);
+      return;
+    }
+
+    const b_id = visitResult.data.data.b_id;
+
+    if (finalBody.photoUri) {
       const photoUri = String(finalBody.photoUri);
       try {
         const filename = photoUri.split('/').pop() || 'photo.jpg';
@@ -88,9 +126,14 @@ export const AppointmentCreateScreen = ({
   return (
     <MainWrapper
       title="Первичный прием"
-      back={() => navigation.goBack()}
+      back={() => setIsExitModalVisible(true)}
     >
       <AppointmentCreate onComplete={handleComplete} />
+      <ExitConfirmModal
+        isVisible={isExitModalVisible}
+        onStay={() => setIsExitModalVisible(false)}
+        onExit={() => { setIsExitModalVisible(false); navigation.goBack(); }}
+      />
     </MainWrapper>
   );
 };

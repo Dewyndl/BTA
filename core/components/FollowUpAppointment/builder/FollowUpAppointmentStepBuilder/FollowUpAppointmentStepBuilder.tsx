@@ -4,6 +4,7 @@ import type { IFollowUpAppointmentStepBuilderProps } from './interfaces';
 import { FollowUpAppointmentStepsEnum } from '../../enums';
 import { AppointmentProcedure } from '../../../AppointmentProcedure';
 import { InjectionZonesSelect } from '../../../InjectionZonesSelect';
+import { HintModal } from '../../../HintModal';
 import { AppointmentsListStep } from '../../steps';
 
 export const FollowUpAppointmentStepBuilder = ({
@@ -43,7 +44,15 @@ export const FollowUpAppointmentStepBuilder = ({
       return (
         <InjectionZonesSelect
           {...(props as unknown as Parameters<typeof InjectionZonesSelect>[0])}
-          onComplete={() => onComplete?.(allBody)}
+          nextStep={FollowUpAppointmentStepsEnum.HINT_MODAL}
+        />
+      );
+    case FollowUpAppointmentStepsEnum.HINT_MODAL:
+      return (
+        <HintModal
+          isVisible
+          onConfirm={() => onComplete?.(allBody)}
+          onCancel={() => setStep(FollowUpAppointmentStepsEnum.INJECTION_ZONES)}
         />
       );
     default:

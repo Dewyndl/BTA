@@ -31,18 +31,23 @@ export const FollowUpAppointment = () => {
 
     const result = await createVisit({
       u_id: currentUser?.u_id ?? '',
-      b_start_address: currentUser?.u_city ?? '',
+      b_start_address: currentUser?.u_city || 'Не указан',
       b_start_datetime: formatted,
       b_payment_way: '1',
       b_options: { type: 'followup' },
     });
 
-    if ('error' in result) {
-      Alert.alert('Ошибка', 'Не удалось создать повторный приём');
+    if ('error' in result || result.data?.code !== '200') {
+      Alert.alert('Ошибка', (result as { data?: { message?: string } }).data?.message || 'Не удалось создать повторный приём');
       return;
     }
 
-    navigation.replace('Home');
+    const b_id = result.data?.data?.b_id;
+    if (b_id) {
+      navigation.replace('InspectionCreate', { id: b_id });
+    } else {
+      navigation.replace('Home');
+    }
   };
 
   return (

@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { palette } from '../../design';
 import { CustomText } from '../../uikit';
@@ -18,6 +19,12 @@ export const ReminderIntervals = () => {
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef<TextInput>(null);
 
+  useEffect(() => {
+    AsyncStorage.getItem('reminder_intervals').then(saved => {
+      if (saved) setIntervals(JSON.parse(saved));
+    });
+  }, []);
+
   const handleReset = () => {
     setIntervals([...DEFAULT_INTERVALS]);
     setEditingId(null);
@@ -31,7 +38,9 @@ export const ReminderIntervals = () => {
 
   const commitEdit = () => {
     if (editingId && editValue.trim()) {
-      setIntervals((prev) => prev.map((i) => (i.id === editingId ? { ...i, value: editValue.trim() } : i)));
+      const updated = intervals.map((i) => (i.id === editingId ? { ...i, value: editValue.trim() } : i));
+      setIntervals(updated);
+      AsyncStorage.setItem('reminder_intervals', JSON.stringify(updated));
     }
     setEditingId(null);
   };

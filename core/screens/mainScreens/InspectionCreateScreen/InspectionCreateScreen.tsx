@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import { MainWrapper } from '../../../wrappers';
 import { InspectionCreate } from '../../../components/InspectionCreate';
 import { useGetVisitQuery, useListPatientsQuery, useVisitActionMutation, useGetPresignedUrlMutation } from '../../../../features';
@@ -45,7 +46,7 @@ export const InspectionCreateScreen = ({
       } catch {}
     }
 
-    await visitAction({
+    const actionResult = await visitAction({
       b_id: id,
       action: 'complete',
       data: JSON.stringify({
@@ -58,6 +59,10 @@ export const InspectionCreateScreen = ({
         },
       }),
     });
+    if ('error' in actionResult || actionResult.data === null) {
+      Alert.alert('Ошибка', 'Не удалось завершить осмотр');
+      return;
+    }
     navigation.replace('Home');
   };
 

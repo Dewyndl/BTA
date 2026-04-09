@@ -107,7 +107,7 @@ export const TextbookContent = ({ onItemPress }: TextbookContentProps) => {
 
       <View style={[flexbox.basic, flexbox.directionRow, flexbox.alignCenter, textbookContentStyles.sortRow]}>
         <CustomText
-          value="Самые важны"
+          value="Самые важные"
           textStyles={{
             fontStyle: FontStyleEnum.NORMAL,
             fontWeight: FontWeightEnum.MEDIUM,

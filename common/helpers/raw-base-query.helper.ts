@@ -6,13 +6,22 @@ const innerBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
 });
 
-export const rawBaseQuery: typeof innerBaseQuery = async (args, api, extraOptions) => {
-  const token = await AsyncStorage.getItem('token');
-  const u_hash = await AsyncStorage.getItem('u_hash');
+const AUTH_ENDPOINTS = ['/auth', '/token', '/register'];
 
-  if (token && u_hash && typeof args !== 'string' && args.body instanceof FormData) {
-    args.body.append('token', token);
-    args.body.append('u_hash', u_hash);
+const isAuthEndpoint = (args: Parameters<typeof innerBaseQuery>[0]): boolean => {
+  if (typeof args === 'string') return AUTH_ENDPOINTS.some((ep) => args.endsWith(ep));
+  return AUTH_ENDPOINTS.some((ep) => args.url.endsWith(ep));
+};
+
+export const rawBaseQuery: typeof innerBaseQuery = async (args, api, extraOptions) => {
+  if (!isAuthEndpoint(args)) {
+    const token = await AsyncStorage.getItem('token');
+    const u_hash = await AsyncStorage.getItem('u_hash');
+
+    if (token && u_hash && typeof args !== 'string' && args.body instanceof FormData) {
+      args.body.append('token', token);
+      args.body.append('u_hash', u_hash);
+    }
   }
 
   return innerBaseQuery(args, api, extraOptions);
