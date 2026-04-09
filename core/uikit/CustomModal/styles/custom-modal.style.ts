@@ -6,7 +6,6 @@ export const customModalStyles = StyleSheet.create({
         filter: 'blur(4px)'
     },
     presable: {
-        width: '100%',
-        height: '100%'
+        flex: 1
     }
 })

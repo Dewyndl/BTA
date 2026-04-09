@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
 import { CustomModal } from '../../uikit';
 import {
   Button,
@@ -33,13 +33,16 @@ const hintModalStyles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     marginHorizontal: 24,
+    maxHeight: '90%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 8,
   },
-  text: {
+  scrollText: {
+    flexGrow: 0,
+    flexShrink: 1,
     marginBottom: 20,
   },
   toggleRow: {
@@ -69,48 +72,52 @@ export const HintModal = ({ isVisible, onConfirm, onCancel }: HintModalProps) =>
       }}
     >
       <View style={hintModalStyles.modalWrapper}>
-      <View style={hintModalStyles.modalContent}>
-        <View style={hintModalStyles.text}>
-          <CustomText
-            value={HINT_TEXT}
-            textStyles={{
-              fontStyle: FontStyleEnum.NORMAL,
-              fontWeight: FontWeightEnum.MEDIUM,
-              fontFamily: FontsFamilyEnum.MONTSERRAT_MEDIUM,
-              fontSize: 14,
-              color: '#222221',
-              textAlign: 'center',
+        <Pressable onPress={(e) => e.stopPropagation()} style={hintModalStyles.modalContent}>
+          <ScrollView
+            style={hintModalStyles.scrollText}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+          >
+            <CustomText
+              value={HINT_TEXT}
+              textStyles={{
+                fontStyle: FontStyleEnum.NORMAL,
+                fontWeight: FontWeightEnum.MEDIUM,
+                fontFamily: FontsFamilyEnum.MONTSERRAT_MEDIUM,
+                fontSize: 14,
+                color: '#222221',
+                textAlign: 'center',
+              }}
+            />
+          </ScrollView>
+          <View style={hintModalStyles.toggleRow}>
+            <SlideBtn
+              title={SKIP_HINT_LABEL}
+              checked={skipHint}
+              onValueChange={setSkipHint}
+            />
+          </View>
+          <Button
+            label="Продолжить"
+            onPress={handleConfirm}
+            gradient={aquaGradient}
+            textColor="#FFF"
+            textCenter
+            customButtonStyles={hintModalStyles.confirmButton}
+          />
+          <Button
+            label="Отмена"
+            onPress={handleCancel}
+            noFillDefaultStyles
+            customButtonStyles={{
+              backgroundColor: '#F6F6F6',
+              borderWidth: 1,
+              borderColor: '#E5E5E5',
             }}
+            textColor="#424242"
+            textCenter
           />
-        </View>
-        <View style={hintModalStyles.toggleRow}>
-          <SlideBtn
-            title={SKIP_HINT_LABEL}
-            checked={skipHint}
-            onValueChange={setSkipHint}
-          />
-        </View>
-        <Button
-          label="Продолжить"
-          onPress={handleConfirm}
-          gradient={aquaGradient}
-          textColor="#FFF"
-          textCenter
-          customButtonStyles={hintModalStyles.confirmButton}
-        />
-        <Button
-          label="Отмена"
-          onPress={handleCancel}
-          noFillDefaultStyles
-          customButtonStyles={{
-            backgroundColor: '#F6F6F6',
-            borderWidth: 1,
-            borderColor: '#E5E5E5',
-          }}
-          textColor="#424242"
-          textCenter
-        />
-      </View>
+        </Pressable>
       </View>
     </CustomModal>
   );

@@ -1,4 +1,4 @@
-import { Alert, Image, Linking, Pressable, View } from 'react-native';
+import { Alert, Image, Linking, NativeModules, Pressable, View } from 'react-native';
 import { IMAGES } from '../../../assets';
 import { KeyboardAwareScrollView } from '../../uikit';
 import {
@@ -18,6 +18,7 @@ import {
   fillUser,
   useGetTokenMutation,
   useLoginUserMutation,
+  useLogoutUserMutation,
   useSendCodeMutation,
 } from '../../../features';
 import type { LoginType } from '../../../features';
@@ -80,6 +81,7 @@ export const Login = ({ onHelpPress = onHelpDefault }: ILoginProps) => {
   const [step, setStep] = useState<LoginStep>('phone');
   const [codeError, setCodeError] = useState<string | null>(null);
   const [loginUser] = useLoginUserMutation();
+  const [logoutUser] = useLogoutUserMutation();
   const [sendCode] = useSendCodeMutation();
   const [getToken] = useGetTokenMutation();
 
@@ -125,12 +127,17 @@ export const Login = ({ onHelpPress = onHelpDefault }: ILoginProps) => {
     setStep('code');
   }, [order, sendIndex, login, sendCode]);
 
-  const handleCodeSubmit = (values: { login?: string; code?: string }) => {
+  const handleCodeSubmit = async (values: { login?: string; code?: string }) => {
     const code = String(values.code ?? '').trim();
     const loginValue = confirmType === 'e-mail'
       ? String(values.login ?? '').trim()
       : String(values.login ?? login ?? '').trim();
     setCodeError(null);
+    await logoutUser().catch(() => {});
+    await AsyncStorage.multiRemove(['token', 'u_hash', 'u_a_role']);
+    await new Promise<void>((resolve) => {
+      NativeModules.Networking?.clearCookies(() => resolve()) ?? resolve();
+    });
     console.log('[LOGIN PAYLOAD]', JSON.stringify({ login: loginValue, type: confirmType }));
     const payload = { login: loginValue, type: confirmType, password: code };
     loginUser(payload).then((res) => {

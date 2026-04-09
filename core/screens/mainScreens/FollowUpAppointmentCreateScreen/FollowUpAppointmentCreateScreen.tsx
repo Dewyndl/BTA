@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import { MainWrapper } from '../../../wrappers';
 import { FollowUpAppointmentCreate } from '../../../components/FollowUpAppointmentCreate';
 import { useGetVisitQuery, useListPatientsQuery, useVisitActionMutation } from '../../../../features';
@@ -19,7 +20,7 @@ export const FollowUpAppointmentCreateScreen = ({
   const initialBody: BodyType = visit ? { patientName: patientNameMap[visit.u_id] ?? visit.u_id } : {};
 
   const handleComplete = async (finalBody: BodyType) => {
-    await visitAction({
+    const actionResult = await visitAction({
       b_id: id,
       action: 'complete_followup',
       data: JSON.stringify({
@@ -29,6 +30,10 @@ export const FollowUpAppointmentCreateScreen = ({
         repeat_interval_months: 1,
       }),
     });
+    if ('error' in actionResult || actionResult.data === null) {
+      Alert.alert('Ошибка', 'Не удалось завершить повторный прием');
+      return;
+    }
     navigation.replace('Home');
   };
 
